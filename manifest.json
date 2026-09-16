@@ -1,0 +1,10 @@
+{
+  "name": "Moto Táxi — Agenda",
+  "short_name": "Moto Táxi",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080b12",
+  "theme_color": "#0a0d14",
+  "lang": "pt-BR",
+  "icons": []
+}

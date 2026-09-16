@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0d14">
+<link rel="manifest" href="manifest.json">
+<title>Moto Táxi — Agenda</title>
+<style>
+:root{--bg:#080b12;--card:#111722;--line:#263041;--yellow:#ffd400;--red:#ef233c;--text:#f5f7fa;--muted:#9da7b5;--green:#25c76f}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#070a10,#101725);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{padding:18px 16px 12px;position:sticky;top:0;background:rgba(8,11,18,.94);backdrop-filter:blur(12px);z-index:5;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:13px;background:var(--yellow);color:#080b12;display:grid;place-items:center;font-size:23px;font-weight:900}
+h1{font-size:20px;margin:0}.sub{color:var(--muted);font-size:12px;margin-top:2px}
+main{padding:14px 14px 90px;max-width:760px;margin:auto}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}.tab{border:1px solid var(--line);background:var(--card);color:var(--muted);padding:11px 6px;border-radius:12px;font-weight:800}.tab.active{background:var(--yellow);color:#080b12;border-color:var(--yellow)}
+.panel{display:none}.panel.active{display:block}
+.daybar{display:flex;gap:8px;align-items:center;margin-bottom:12px}.daybar input{flex:1;background:var(--card);color:var(--text);border:1px solid var(--line);padding:12px;border-radius:12px}
+.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer}.primary{background:var(--yellow);color:#080b12}.danger{background:#35131a;color:#ff7887;border:1px solid #69202d}.ghost{background:var(--card);color:var(--text);border:1px solid var(--line)}
+.grid{display:grid;gap:8px}.slot{display:grid;grid-template-columns:92px 1fr auto;gap:9px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}.time{font-weight:900;color:var(--yellow);font-size:14px}.empty{color:var(--muted);font-size:12px}.occupied{border-color:#715f00;background:linear-gradient(90deg,#17170e,#111722)}
+.badge{font-size:10px;font-weight:900;padding:4px 7px;border-radius:999px;background:#252d3a;color:#dce3ec}.badge.busca{background:#261b05;color:var(--yellow)}.badge.leva{background:#24131a;color:#ff6b7b}.info strong{display:block;font-size:14px}.info small{display:block;color:var(--muted);margin-top:2px}.actions{display:flex;gap:5px}.mini{padding:8px 9px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}.card h2{font-size:16px;margin:0 0 12px}
+label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin:9px 0 5px}input,select,textarea{width:100%;background:#0b1018;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}textarea{min-height:72px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-actions{display:flex;gap:8px;margin-top:13px}
+.list{display:grid;gap:8px}.person{padding:11px;border:1px solid var(--line);border-radius:12px;background:#0d131d}.person b{font-size:14px}.person small{display:block;color:var(--muted);margin-top:3px}
+.plan{display:grid;grid-template-columns:1fr auto;gap:4px;padding:12px 0;border-bottom:1px solid var(--line)}.plan:last-child{border:0}.plan b{color:var(--yellow)}
+.notice{font-size:12px;color:var(--muted);line-height:1.45}.emptybig{text-align:center;padding:35px 10px;color:var(--muted)}
+footer{position:fixed;bottom:0;left:0;right:0;padding:10px 14px;background:rgba(8,11,18,.95);border-top:1px solid var(--line);z-index:5}.footerbtn{width:100%;max-width:760px;display:block;margin:auto}
+@media(max-width:500px){.slot{grid-template-columns:78px 1fr}.actions{grid-column:2}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">🏍️</div><div><h1>Moto Táxi — Agenda</h1><div class="sub">Organize suas corridas e seus passageiros</div></div></div></header>
+<main>
+<div class="tabs">
+<button class="tab active" data-tab="agenda">Agenda</button>
+<button class="tab" data-tab="novo">Novo</button>
+<button class="tab" data-tab="clientes">Passageiros</button>
+</div>
+
+<section id="agenda" class="panel active">
+<div class="daybar"><input id="agendaDate" type="date"><button class="btn ghost" onclick="goToday()">Hoje</button></div>
+<div id="agendaList" class="grid"></div>
+</section>
+
+<section id="novo" class="panel">
+<div class="card">
+<h2 id="formTitle">Novo agendamento</h2>
+<input id="editId" type="hidden">
+<label>Data</label><input id="date" type="date">
+<div class="row"><div><label>Horário</label><select id="time"></select></div><div><label>Serviço</label><select id="type"><option value="busca">Buscar passageiro</option><option value="leva">Levar passageiro</option><option value="ida-volta">Ida e volta</option></select></div></div>
+<label>Nome do passageiro</label><input id="name" placeholder="Ex.: João">
+<label>WhatsApp</label><input id="phone" inputmode="tel" placeholder="Ex.: 17999999999">
+<label>Local de busca</label><input id="pickup" placeholder="Onde você vai buscar?">
+<label>Destino</label><input id="destination" placeholder="Para onde vai levar?">
+<label>Observações</label><textarea id="notes" placeholder="Ex.: chamar no portão, retorno às 18h..."></textarea>
+<div class="form-actions"><button class="btn primary" onclick="saveRide()">Salvar agendamento</button><button class="btn ghost" onclick="clearForm()">Limpar</button></div>
+</div>
+</section>
+
+<section id="clientes" class="panel">
+<div class="card"><h2>Passageiros cadastrados</h2><div id="clients" class="list"></div></div>
+<div class="card"><h2>Plano mensal</h2><div class="notice">Valores conforme a tabela que você forneceu.</div>
+<div class="plan"><span>7 dias</span><b>R$ 84,00</b></div><div class="plan"><span>10 dias</span><b>R$ 120,00</b></div><div class="plan"><span>15 dias</span><b>R$ 180,00</b></div><div class="plan"><span>20 dias</span><b>R$ 240,00</b></div><div class="plan"><span>25 dias</span><b>R$ 300,00</b></div><div class="plan"><span>30 dias</span><b>R$ 360,00</b></div></div>
+</section>
+</main>
+<footer><button class="btn primary footerbtn" onclick="openNew()">＋ Agendar passageiro</button></footer>
+
+<script>
+const KEY='motoTaxiRidesV1';
+const slots=[];
+for(let h=7;h<=20;h++) for(let m of [0,30]) if(h<21) slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+let rides=JSON.parse(localStorage.getItem(KEY)||'[]');
+
+const $=id=>document.getElementById(id);
+function isoToday(){let d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function save(){localStorage.setItem(KEY,JSON.stringify(rides))}
+function fmtDate(v){return new Date(v+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})}
+function init(){
+ $('agendaDate').value=isoToday(); $('date').value=isoToday();
+ $('agendaDate').onchange=renderAgenda;
+ slots.forEach(t=>$('time').insertAdjacentHTML('beforeend',`<option>${t}</option>`));
+ document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+ renderAgenda(); renderClients();
+}
+function showTab(id){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id))}
+function goToday(){$('agendaDate').value=isoToday();renderAgenda()}
+function openNew(){clearForm();showTab('novo')}
+function clearForm(){
+ $('editId').value='';$('formTitle').textContent='Novo agendamento';$('date').value=$('agendaDate').value||isoToday();$('time').value=slots[0];$('type').value='busca';$('name').value='';$('phone').value='';$('pickup').value='';$('destination').value='';$('notes').value='';
+}
+function saveRide(){
+ const id=$('editId').value||Date.now().toString(), date=$('date').value,time=$('time').value,name=$('name').value.trim(),pickup=$('pickup').value.trim(),destination=$('destination').value.trim();
+ if(!date||!time||!name||!pickup||!destination){alert('Preencha data, horário, nome, local de busca e destino.');return}
+ const conflict=rides.find(r=>r.date===date&&r.time===time&&r.id!==id);
+ if(conflict){if(!confirm(`O horário ${time} já está ocupado por ${conflict.name}. Deseja substituir?`))return;rides=rides.filter(r=>r.id!==conflict.id)}
+ const ride={id,date,time,type:$('type').value,name,phone:$('phone').value.trim(),pickup,destination,notes:$('notes').value.trim()};
+ const i=rides.findIndex(r=>r.id===id); if(i>=0)rides[i]=ride;else rides.push(ride);rides.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));save();
+ $('agendaDate').value=date;renderAgenda();renderClients();showTab('agenda');
+}
+function renderAgenda(){
+ const d=$('agendaDate').value; const day=rides.filter(r=>r.date===d); let html='';
+ slots.forEach(t=>{
+  const r=day.find(x=>x.time===t);
+  if(r) html+=`<div class="slot occupied"><div class="time">${t}</div><div class="info"><strong>${esc(r.name)}</strong><small>${esc(r.pickup)} → ${esc(r.destination)}</small><span class="badge ${r.type==='leva'?'leva':'busca'}">${r.type==='leva'?'LEVAR':r.type==='ida-volta'?'IDA E VOLTA':'BUSCAR'}</span></div><div class="actions"><button class="btn ghost mini" onclick="editRide('${r.id}')">Editar</button><button class="btn danger mini" onclick="deleteRide('${r.id}')">×</button></div></div>`;
+  else html+=`<div class="slot"><div class="time">${t}</div><div class="empty">Horário livre</div><div><button class="btn ghost mini" onclick="newAt('${t}')">＋</button></div></div>`;
+ });
+ $('agendaList').innerHTML=html||'<div class="emptybig">Nenhum horário disponível.</div>';
+}
+function newAt(t){openNew();$('time').value=t}
+function editRide(id){const r=rides.find(x=>x.id===id);if(!r)return;$('editId').value=r.id;$('formTitle').textContent='Editar agendamento';$('date').value=r.date;$('time').value=r.time;$('type').value=r.type;$('name').value=r.name;$('phone').value=r.phone||'';$('pickup').value=r.pickup;$('destination').value=r.destination;$('notes').value=r.notes||'';showTab('novo')}
+function deleteRide(id){const r=rides.find(x=>x.id===id);if(r&&confirm(`Cancelar o agendamento de ${r.name} às ${r.time}?`)){rides=rides.filter(x=>x.id!==id);save();renderAgenda();renderClients()}}
+function renderClients(){const map={};rides.forEach(r=>{if(!map[r.name])map[r.name]={name:r.name,phone:r.phone||'',count:0};map[r.name].count++});const arr=Object.values(map);$('clients').innerHTML=arr.length?arr.map(c=>`<div class="person"><b>${esc(c.name)}</b><small>${c.phone?esc(c.phone)+' · ':''}${c.count} agendamento(s)</small></div>`).join(''):'<div class="emptybig">Seus passageiros aparecerão aqui.</div>'}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "appId": "br.com.mototaxi.agenda",
+  "appName": "Moto Táxi",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  }
+}
